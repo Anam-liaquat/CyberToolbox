@@ -1,0 +1,76 @@
+//Python script to gather basic information about a website, such as its headers, IP address, and SSL certificate details:
+
+import socket
+import requests
+import ssl
+import OpenSSL
+from urllib.parse import urlparse
+
+def get_website_info(url):
+    # Extract domain from URL
+    domain = urlparse(url).netloc
+    if not domain:
+        domain = url
+
+    print(f"Gathering information for: {url}")
+
+    # Get website headers
+    try:
+        response = requests.head(url, timeout=10)
+        print("\nWebsite Headers:")
+        for header, value in response.headers.items():
+            print(f"{header}: {value}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching headers: {e}")
+
+    # Get IP address of the website
+    try:
+        ip_address = socket.gethostbyname(domain)
+        print(f"\nIP Address of {domain}: {ip_address}")
+    except socket.gaierror as e:
+        print(f"Error fetching IP address: {e}")
+
+    # Get SSL certificate details (if available)
+    try:
+        cert = ssl.get_server_certificate((domain, 443))
+        x509 = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
+        subject = x509.get_subject()
+        issuer = x509.get_issuer()
+        not_after = x509.get_notAfter().decode('utf-8')
+
+        print(f"\nSSL Certificate Information:")
+        print(f"  Subject: {subject}")
+        print(f"  Issuer: {issuer}")
+        print(f"  Expiration Date: {not_after}")
+    except Exception as e:
+        print(f"Error fetching SSL certificate details: {e}")
+
+def main():
+    # Input the URL to gather information
+    url = input("Enter the URL of the website to gather information: ").strip()
+
+    # Validate URL format
+    if not url.startswith("http://") and not url.startswith("https://"):
+        print("Please provide a valid URL (e.g., http://example.com or https://example.com).")
+        return
+
+    # Gather website information
+    get_website_info(url)
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+//install required libraries
+pip install requests
+pip install pyOpenSSL
+
+
+
+//run 
+python3 'websiteurl'
